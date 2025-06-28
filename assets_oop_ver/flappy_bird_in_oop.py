@@ -58,10 +58,45 @@ class FlappyBirdGame:
         self.create_pipe()
         
 # define function to create a pipe with random height
+    def create_pipe(self):
+        pipe_height = random.randint(100, 300)
+        self.pipes.append({"x": self.WIDTH, "top": pipe_height, "bottom": pipe_height + self.pipe_gap})
+
 # define function to reset the game state
+    def reset_game(self):
+        self.bird_y = self.HEIGHT // 2
+        self.bird_velocity = 0
+        self.pipes = []
+        self.score = 0
+        self.create_pipe()
+        self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[0]).convert_alpha(), (self.WIDTH, self.HEIGHT))
+        
 # define function to draw retry button and return its rectangle
+    def draw_retry_button(self):
+        button_rect = pygame.Rect(self.WIDTH // 2 - 50, self.HEIGHT // 2 + 40, 100, 40)
+        pygame.draw.rect(self.screen, (200, 0, 0), button_rect)
+        retry_text = self.font.render("Retry", True, (255, 255, 255))
+        self.screen.blit(retry_text, (self.WIDTH // 2 - 25, self.HEIGHT // 2 + 50))
+        return button_rect
+    
 # define function to check collision using pixel-perfect masks
-# create the first pipe
+    def check_collision(self):
+        bird_mask = pygame.mask.from_surface(self.bird_img)
+        for pipe in self.pipes:
+            pipe_x = pipe["x"]
+            pipe_top_y = pipe["top"] - 300
+            pipe_bottom_y = pipe["bottom"]
+
+            pipe_top_mask = pygame.mask.from_surface(self.pipe_img)
+            pipe_bottom_mask = pygame.mask.from_surface(self.pipe_img)
+
+            top_offset = (pipe_x - self.bird_x, pipe_top_y - int(self.bird_y))
+            bottom_offset = (pipe_x - self.bird_x, pipe_bottom_y - int(self.bird_y))
+
+            if bird_mask.overlap(pipe_top_mask, top_offset) or bird_mask.overlap(pipe_bottom_mask, bottom_offset):
+                return True
+        return False
+    
 # start game loop
 # draw background
 # handle quit and spacebar press
