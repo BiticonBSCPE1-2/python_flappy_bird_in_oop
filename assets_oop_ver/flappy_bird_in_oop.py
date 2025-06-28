@@ -152,11 +152,44 @@ class FlappyBirdGame:
                 score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
                 self.screen.blit(score_text, (10, 10))
                                 
-# if game over
-# show explosion and game over text
-# draw retry button and wait for click
-# if game not started
-# show "Press SPACE to Start" message
-# update screen
-# limit frame rate to 30 FPS
-# quit pygame after loop ends
+                # if game over
+                if game_over:
+                    # show explosion and game over text
+                    self.screen.blit(self.explosion_img, (self.bird_x - 10, self.bird_y - 10))
+                    game_over_text = self.font.render("Game Over!", True, (255, 0, 0))
+                    self.screen.blit(game_over_text, (self.WIDTH // 2 - 60, self.HEIGHT // 2 - 20))
+
+                    # draw retry button and wait for user input
+                    retry_button = self.draw_retry_button()
+                    pygame.display.flip()
+
+                    retry_clicked = False
+                    while not retry_clicked:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                self.running = False
+                                retry_clicked = True
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                if retry_button.collidepoint(event.pos):
+                                    self.reset_game()
+                                    self.game_started = False
+                                    retry_clicked = True
+            else:
+                # show "Press SPACE to Start"
+                start_text = self.font.render("Press SPACE to Start", True, (255, 255, 255))
+                self.screen.blit(start_text, (self.WIDTH // 2 - 100, self.HEIGHT // 2))
+
+            # update screen
+            pygame.display.flip()
+
+            # set frame rate to 30 FPS
+            self.clock.tick(30)
+
+        # quit pygame after exiting loop
+        pygame.quit()
+
+# run the game
+if __name__ == "__main__":
+    game = FlappyBirdGame()
+    game.run()
+
