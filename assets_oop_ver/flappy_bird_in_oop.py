@@ -120,12 +120,17 @@ class FlappyBirdGame:
                 
                 # move all pipes leftward
                 for pipe in self.pipes:
-                    pipe["x"] -= self.pipe_velocity                
+                    pipe["x"] -= self.pipe_velocity
+
+                # add a new pipe if the last one has moved far enough
+                if self.pipes and self.pipes[-1]["x"] < self.WIDTH - 200:
+                    self.create_pipe()
                 
                 # remove old pipe and increase score
-                if self.pipes[0]["x"] < -self.pipe_width:
+                if self.pipes and self.pipes[0]["x"] < -self.pipe_width:
                     self.pipes.pop(0)
-                    self.score += 1                
+                    self.score += 1
+
                 
                 # change background based on score
                 if self.score >= 5:
