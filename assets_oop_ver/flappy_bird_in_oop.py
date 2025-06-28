@@ -122,10 +122,6 @@ class FlappyBirdGame:
                 for pipe in self.pipes:
                     pipe["x"] -= self.pipe_velocity                
                 
-                # add new pipe if needed
-                for pipe in self.pipes:
-                    pipe["x"] -= self.pipe_velocity
-                
                 # remove old pipe and increase score
                 if self.pipes[0]["x"] < -self.pipe_width:
                     self.pipes.pop(0)
