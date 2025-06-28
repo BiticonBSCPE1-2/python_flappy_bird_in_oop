@@ -1,32 +1,34 @@
 import pygame
 import random
 
-# define a class for the Flappy Bird game
-class FlappyBirdGame:
-    def __init__(self):
-        # initialize pygame
+# create a base class for general game setup (Inheritance)
+class BaseGame:
+    def __init__(self, width, height, title):  # (Inheritance)
         pygame.init()
-
-        # set screen width and height
-        self.WIDTH, self.HEIGHT = 400, 600
-
-        # create the screen and set caption
+        self.WIDTH = width
+        self.HEIGHT = height
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
-        pygame.display.set_caption("Thonny Flappy Bird")
+        pygame.display.set_caption(title)
+        self.clock = pygame.time.Clock()
+
+# define a class for the Flappy Bird game (Encapsulation, Inheritance)
+class FlappyBirdGame(BaseGame):  # (Inheritance)
+    def __init__(self):
+        super().__init__(400, 600, "Thonny Flappy Bird")  # (Inheritance)
 
         # load and scale bird image
-        self.bird_img = pygame.transform.scale(pygame.image.load("bird.png").convert_alpha(), (80, 50))
+        self.bird_img = pygame.transform.scale(pygame.image.load("bird.png").convert_alpha(), (80, 50))  # (Polymorphism)
 
         # load and scale pipe image and its flipped version
-        self.pipe_img = pygame.transform.scale(pygame.image.load("pipe.png").convert_alpha(), (160, 300))
-        self.flipped_pipe_img = pygame.transform.flip(self.pipe_img, False, True)
+        self.pipe_img = pygame.transform.scale(pygame.image.load("pipe.png").convert_alpha(), (160, 300))  # (Polymorphism)
+        self.flipped_pipe_img = pygame.transform.flip(self.pipe_img, False, True)  # (Polymorphism)
 
         # load background images and set initial background
         self.backgrounds = ["background1.png", "background2.png", "background3.png"]
-        self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[0]).convert_alpha(), (self.WIDTH, self.HEIGHT))
+        self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[0]).convert_alpha(), (self.WIDTH, self.HEIGHT))  # (Polymorphism)
 
         # load and scale explosion image
-        self.explosion_img = pygame.transform.scale(pygame.image.load("explosion.png").convert_alpha(), (120, 120))
+        self.explosion_img = pygame.transform.scale(pygame.image.load("explosion.png").convert_alpha(), (120, 120))  # (Polymorphism)
 
         # create masks for collision detection
         self.bird_mask = pygame.mask.from_surface(self.bird_img)
@@ -49,20 +51,19 @@ class FlappyBirdGame:
         self.score = 0
         self.font = pygame.font.Font(None, 36)
 
-        # set up clock and control flags
-        self.clock = pygame.time.Clock()
+        # set control flags
         self.running = True
         self.game_started = False
 
         # create initial pipe
         self.create_pipe()
-        
-# define function to create a pipe with random height
+
+# define function to create a pipe with random height (Encapsulation)
     def create_pipe(self):
         pipe_height = random.randint(100, 300)
         self.pipes.append({"x": self.WIDTH, "top": pipe_height, "bottom": pipe_height + self.pipe_gap})
 
-# define function to reset the game state
+# define function to reset the game state (Encapsulation)
     def reset_game(self):
         self.bird_y = self.HEIGHT // 2
         self.bird_velocity = 0
@@ -70,16 +71,16 @@ class FlappyBirdGame:
         self.score = 0
         self.create_pipe()
         self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[0]).convert_alpha(), (self.WIDTH, self.HEIGHT))
-        
-# define function to draw retry button and return its rectangle
+
+# define function to draw retry button and return its rectangle (Encapsulation)
     def draw_retry_button(self):
         button_rect = pygame.Rect(self.WIDTH // 2 - 50, self.HEIGHT // 2 + 40, 100, 40)
         pygame.draw.rect(self.screen, (200, 0, 0), button_rect)
-        retry_text = self.font.render("Retry", True, (255, 255, 255))
+        retry_text = self.font.render("Retry", True, (255, 255, 255))  # (Polymorphism)
         self.screen.blit(retry_text, (self.WIDTH // 2 - 25, self.HEIGHT // 2 + 50))
         return button_rect
-    
-# define function to check collision using pixel-perfect masks
+
+# define function to check collision using pixel-perfect masks (Encapsulation, Polymorphism)
     def check_collision(self):
         bird_mask = pygame.mask.from_surface(self.bird_img)
         for pipe in self.pipes:
@@ -93,17 +94,17 @@ class FlappyBirdGame:
             top_offset = (pipe_x - self.bird_x, pipe_top_y - int(self.bird_y))
             bottom_offset = (pipe_x - self.bird_x, pipe_bottom_y - int(self.bird_y))
 
-            if bird_mask.overlap(pipe_top_mask, top_offset) or bird_mask.overlap(pipe_bottom_mask, bottom_offset):
+            if bird_mask.overlap(pipe_top_mask, top_offset) or bird_mask.overlap(pipe_bottom_mask, bottom_offset):  # (Polymorphism)
                 return True
         return False
-    
-# start game loop
+
+# start game loop (Encapsulation)
     def run(self):
         while self.running:
-            
+
             # draw background
             self.screen.blit(self.current_bg, (0, 0))
-            
+
             # handle quit and spacebar press
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -111,13 +112,13 @@ class FlappyBirdGame:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     self.game_started = True
                     self.bird_velocity = self.jump_strength
-                                
+
             # if game started
             if self.game_started:
                 # apply gravity and update bird position
                 self.bird_velocity += self.gravity
-                self.bird_y += self.bird_velocity                
-                
+                self.bird_y += self.bird_velocity
+
                 # move all pipes leftward
                 for pipe in self.pipes:
                     pipe["x"] -= self.pipe_velocity
@@ -125,34 +126,33 @@ class FlappyBirdGame:
                 # add a new pipe if the last one has moved far enough
                 if self.pipes and self.pipes[-1]["x"] < self.WIDTH - 200:
                     self.create_pipe()
-                
+
                 # remove old pipe and increase score
                 if self.pipes and self.pipes[0]["x"] < -self.pipe_width:
                     self.pipes.pop(0)
                     self.score += 1
 
-                
                 # change background based on score
                 if self.score >= 5:
-                    self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[1]).convert_alpha(), (self.WIDTH, self.HEIGHT))
+                    self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[1]).convert_alpha(), (self.WIDTH, self.HEIGHT))  # (Polymorphism)
                 if self.score >= 10:
-                    self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[2]).convert_alpha(), (self.WIDTH, self.HEIGHT))
-                                    
+                    self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[2]).convert_alpha(), (self.WIDTH, self.HEIGHT))  # (Polymorphism)
+
                 # check for collision with pipes or ground
-                game_over = self.check_collision() or self.bird_y > self.HEIGHT                
+                game_over = self.check_collision() or self.bird_y > self.HEIGHT
 
                 # draw all pipes
                 for pipe in self.pipes:
                     self.screen.blit(self.flipped_pipe_img, (pipe["x"], pipe["top"] - 300))
-                    self.screen.blit(self.pipe_img, (pipe["x"], pipe["bottom"]))                
+                    self.screen.blit(self.pipe_img, (pipe["x"], pipe["bottom"]))
 
                 # draw bird
-                self.screen.blit(self.bird_img, (self.bird_x, int(self.bird_y)))                
-                
+                self.screen.blit(self.bird_img, (self.bird_x, int(self.bird_y)))
+
                 # draw score on screen
                 score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
                 self.screen.blit(score_text, (10, 10))
-                                
+
                 # if game over
                 if game_over:
                     # show explosion and game over text
@@ -189,8 +189,7 @@ class FlappyBirdGame:
         # quit pygame after exiting loop
         pygame.quit()
 
-# run the game
+# run the game (Encapsulation)
 if __name__ == "__main__":
-    game = FlappyBirdGame()
+    game = FlappyBirdGame()  # (Inheritance)
     game.run()
-
