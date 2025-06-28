@@ -98,18 +98,60 @@ class FlappyBirdGame:
         return False
     
 # start game loop
-# draw background
-# handle quit and spacebar press
-# if game started
-# apply gravity and update bird position
-# move all pipes leftward
-# add new pipe if needed
-# remove old pipe and increase score
-# change background based on score
-# check for collision with pipes or ground
-# draw all pipes
-# draw bird
-# draw score on screen
+    def run(self):
+        while self.running:
+            
+            # draw background
+            self.screen.blit(self.current_bg, (0, 0))
+            
+            # handle quit and spacebar press
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    self.game_started = True
+                    self.bird_velocity = self.jump_strength
+                                
+            # if game started
+            if self.game_started:
+                # apply gravity and update bird position
+                self.bird_velocity += self.gravity
+                self.bird_y += self.bird_velocity                
+                
+                # move all pipes leftward
+                for pipe in self.pipes:
+                    pipe["x"] -= self.pipe_velocity                
+                
+                # add new pipe if needed
+                for pipe in self.pipes:
+                    pipe["x"] -= self.pipe_velocity
+                
+                # remove old pipe and increase score
+                if self.pipes[0]["x"] < -self.pipe_width:
+                    self.pipes.pop(0)
+                    self.score += 1                
+                
+                # change background based on score
+                if self.score >= 5:
+                    self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[1]).convert_alpha(), (self.WIDTH, self.HEIGHT))
+                if self.score >= 10:
+                    self.current_bg = pygame.transform.scale(pygame.image.load(self.backgrounds[2]).convert_alpha(), (self.WIDTH, self.HEIGHT))
+                                    
+                # check for collision with pipes or ground
+                game_over = self.check_collision() or self.bird_y > self.HEIGHT                
+
+                # draw all pipes
+                for pipe in self.pipes:
+                    self.screen.blit(self.flipped_pipe_img, (pipe["x"], pipe["top"] - 300))
+                    self.screen.blit(self.pipe_img, (pipe["x"], pipe["bottom"]))                
+
+                # draw bird
+                self.screen.blit(self.bird_img, (self.bird_x, int(self.bird_y)))                
+                
+                # draw score on screen
+                score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
+                self.screen.blit(score_text, (10, 10))
+                                
 # if game over
 # show explosion and game over text
 # draw retry button and wait for click
